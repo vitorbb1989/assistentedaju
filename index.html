@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assistente de Prompt da Ju — Gerador de Prompts para Carreira em Dados</title>
+
+  <!-- Meta SEO/OG básicos -->
+  <meta name="description" content="Gere prompts personalizados para carreira em dados: mercado, currículo, entrevista e plano de estudos." />
+  <meta property="og:title" content="Assistente de Prompt da Ju — Gerador de Prompts" />
+  <meta property="og:description" content="Ferramenta prática para gerar prompts sob medida para carreira em dados no Brasil." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI2IiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgogIDxwYXRoIGQ9Ik0xNiA4TDggMTRMMTYgMjBMMjQgMTRMMTYgOFoiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4KICA8cGF0aCBkPSJNMTYgMTJMMTIgMTVMMTYgMThMMjAgMTVMMTYgMTJaIiBmaWxsPSJ3aGl0ZSIvPgogIDxjaXJjbGUgY3g9IjE2IiBjeT0iMjIiIHI9IjIiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiLz4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQiIHgxPSIwIiB5MT0iMCIgeDI9IjMyIiB5Mj0iMzIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iIzI1NjNlYiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3YzNhZWQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgo8L3N2Zz4K" />
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ------------------------------
+       RESET & TOKENS
+    --------------------------------*/
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.6; letter-spacing: .1px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    :root {
+      --primary-blue: #2563eb;
+      --primary-purple: #7c3aed;
+      --primary-indigo: #6366f1;
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --ok: #10b981;
+      --ok-dark: #059669;
+      --danger: #ef4444;
+      --shadow-1: 0 8px 28px rgba(2, 6, 23, .06);
+      --shadow-2: 0 14px 40px rgba(2, 6, 23, .10);
+      --radius: 14px;
+      --transition: .25s ease;
+      --container: 1120px;
+    }
+
+    /* Dark theme (class-based + auto) */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+      }
+    }
+    body.theme-dark {
+      --bg: #0d1224;
+      --surface: #0f152a;
+      --text: #e6e9f2;
+      --text-muted: #aab1c6;
+      --border: #1d2740;
+      --shadow-1: 0 10px 30px rgba(0,0,0,.25);
+      --shadow-2: 0 16px 48px rgba(0,0,0,.35);
+      --primary-blue: #3b82f6;
+      --primary-purple: #8b5cf6;
+    }
+
+    /* ------------------------------
+       LAYOUT
+    --------------------------------*/
+    body { background: var(--bg); color: var(--text); }
+    .container { max-width: var(--container); margin: 0 auto; padding: 48px 24px; }
+
+    /* Skip to content (acessibilidade) */
+    .skip-link {
+      position: absolute; left: -999px; top: -999px;
+    }
+    .skip-link:focus {
+      left: 16px; top: 16px; z-index: 9999;
+      background: var(--surface); color: var(--text);
+      padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-1);
+    }
+
+    /* ------------------------------
+       HEADER (hero)
+    --------------------------------*/
+    header {
+      padding: 56px 20px;
+      background:
+        radial-gradient(1200px 400px at 50% -20%, rgba(255,255,255,.10), transparent),
+        linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+      color: #fff;
+      text-align: center;
+    }
+    .wordmark { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }
+    .logo-text {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: clamp(18px, 2.5vw, 24px);
+      font-weight: 600;
+      margin: 16px 0 8px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    header p  { font-size: clamp(14px, 2vw, 16px); opacity: .90; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+
+    /* ------------------------------
+       CARDS (módulos)
+    --------------------------------*/
+    .modules-section {
+      display: grid; gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-bottom: 40px;
+    }
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      text-align: center;
+      cursor: pointer;
+      min-height: 180px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      box-shadow: var(--shadow-1);
+    }
+    .module-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-2);
+      border-color: var(--primary-blue);
+    }
+    .module-icon { width: 48px; height: 48px; margin-bottom: 14px; }
+    .module-card h3 { font-family: Poppins, Inter, sans-serif; font-size: 20px; font-weight: 700; margin: 4px 0 6px; color: var(--text); }
+    .module-card p  { font-size: 14px; color: var(--text-muted); }
+
+    /* Botão especial para Assistente de Carreira */
+    .module-card.career-assistant {
+      background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-indigo) 100%);
+      border: 2px solid var(--primary-purple);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .module-card.career-assistant::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20%, -20%); }
+    }
+    .module-card.career-assistant h3,
+    .module-card.career-assistant p {
+      color: #fff;
+      position: relative;
+      z-index: 1;
+    }
+    .module-card.career-assistant:hover {
+      transform: translateY(-5px) scale(1.02);
+      border-color: #fff;
+    }
+
+    /* ------------------------------
+       FORM CONTAINERS
+    --------------------------------*/
+    .form-section {
+      max-width: 640px; margin: 0 auto; display: none;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-1);
+    }
+    .form-section.active { display: block; animation: slideIn .28s ease; }
+    .form-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .btn-back {
+      background: none; border: none; color: #fff;
+      cursor: pointer; font-size: 16px; padding: 10px 12px; border-radius: 10px;
+      transition: background var(--transition), transform .08s ease;
+    }
+    .btn-back:hover { transform: translateY(-1px); }
+    .btn-back { color: var(--primary-blue); background: rgba(37,99,235,.10); }
+
+    .form-header h2 { font-family: Poppins, Inter, sans-serif; font-size: 24px; font-weight: 700; margin: 0; }
+
+    .form-group { margin-bottom: 22px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .form-group.required label::after { content: " *"; color: var(--danger); }
+
+    input[type="text"], input[type="email"], select, textarea {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+      font: inherit; background: #fff; transition: box-shadow var(--transition), border-color var(--transition);
+      background: var(--surface); color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--primary-blue);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.18);
+    }
+    textarea { min-height: 120px; resize: vertical; }
+
+    .checkbox-group, .radio-group { display: flex; flex-direction: column; gap: 12px; }
+    .checkbox-group label, .radio-group label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: 400; color: var(--text); }
+    input[type="checkbox"], input[type="radio"] { margin-top: 4px; cursor: pointer; flex-shrink: 0; }
+
+    .alert-info {
+      background: rgba(37,99,235,.08); border-left: 4px solid var(--primary-blue);
+      padding: 14px 16px; border-radius: 10px; margin: 18px 0; font-size: 14px; color: var(--text);
+    }
+    .alert-warn {
+      background: rgba(239,68,68,.08); border-left: 4px solid var(--danger);
+      padding: 14px 16px; border-radius: 10px; margin: 18px 0; font-size: 14px; color: var(--text);
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+      color: #fff; border: none; padding: 14px 24px; border-radius: 10px;
+      font: inherit; font-weight: 600; cursor: pointer;
+      transition: transform .14s ease, box-shadow .14s ease;
+      box-shadow: 0 4px 14px rgba(37,99,235,.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37,99,235,.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .result-section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .result-header h3 { font-family: Poppins, Inter, sans-serif; font-size: 20px; font-weight: 700; margin: 0; }
+
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-action {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font: inherit; font-weight: 500; cursor: pointer;
+      transition: background var(--transition), transform .08s ease;
+    }
+    .btn-action:hover { background: var(--bg); transform: translateY(-1px); }
+
+    .copy-feedback {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 8px; background: var(--ok); color: #fff;
+      font-size: 14px; font-weight: 500; opacity: 0; transition: opacity .2s ease;
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      box-shadow: 0 6px 20px rgba(16,185,129,.3);
+    }
+    .copy-feedback.active { opacity: 1; }
+
+    textarea#generated-prompt {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px; line-height: 1.5; background: var(--bg); padding: 16px;
+      border: 1px solid var(--border); border-radius: 10px; min-height: 240px;
+      color: var(--text);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ------------------------------
+       FOOTER
+    --------------------------------*/
+    footer {
+      margin-top: 80px;
+      padding: 40px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    footer p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    footer a {
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color var(--transition);
+    }
+    footer a:hover {
+      color: var(--primary-purple);
+    }
+    .footer-logo {
+      margin-bottom: 16px;
+      font-family: Poppins, Inter, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ------------------------------
+       MODAL ASSISTENTE DE CARREIRA
+    --------------------------------*/
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--radius);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 40px;
+      position: relative;
+      box-shadow: var(--shadow-2);
+      animation: modalSlideIn .3s ease;
+    }
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background var(--transition), color var(--transition);
+    }
+    .modal-close:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+    .modal-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    .modal-header h2 {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-header p {
+      color: var(--text-muted);
+      margin: 0;
+      font-size: 16px;
+    }
+    .career-content {
+      color: var(--text);
+    }
+    .career-content h3 {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 30px 0 15px 0;
+      color: var(--primary-blue);
+    }
+    .career-content h4 {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 20px 0 12px 0;
+      color: var(--primary-purple);
+    }
+    .career-content p {
+      margin: 12px 0;
+      line-height: 1.7;
+    }
+    .career-content ul, .career-content ol {
+      margin: 12px 0;
+      padding-left: 24px;
+      line-height: 1.8;
+    }
+    .career-content li {
+      margin: 8px 0;
+    }
+    .career-content strong {
+      color: var(--primary-blue);
+      font-weight: 600;
+    }
+    .career-content code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: var(--primary-purple);
+    }
+    .step-box {
+      background: var(--bg);
+      border-left: 4px solid var(--primary-blue);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .step-box h4 {
+      margin-top: 0;
+    }
+    .prompt-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 8px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    .divider {
+      border: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 40px 0;
+    }
+
+    /* ------------------------------
+       RESPONSIVIDADE
+    --------------------------------*/
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      header { padding: 40px 16px; }
+      .modules-section { grid-template-columns: 1fr; }
+      .modal-content { padding: 24px; }
+      .modal-header h2 { font-size: 24px; }
+      .career-content h3 { font-size: 20px; }
+      .career-content h4 { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <div class="wordmark">
+      <h1 class="logo-text">Assistente de Prompt da Ju</h1>
+    </div>
+    <h2 class="subtitle">Gerador de Prompts para Carreira em Dados</h2>
+    <p>Crie prompts poderosos e personalizados para impulsionar sua carreira em dados</p>
+  </header>
+
+  <main id="main-content">
+    <div class="container">
+      <!-- Módulos principais -->
+      <div class="modules-section">
+        <div class="module-card career-assistant" data-module="career" tabindex="0" role="button" aria-label="Monte seu assistente de carreira">
+          <div class="module-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>Monte seu Assistente de Carreira</h3>
+          <p>Guia completo para criar seu consultor de carreira personalizado com IA</p>
+        </div>
+
+        <div class="module-card" data-module="market" tabindex="0" role="button" aria-label="Análise de Mercado">
+          <div class="module-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <h3>Análise de Mercado</h3>
+          <p>Entenda tendências e oportunidades no mercado de dados</p>
+        </div>
+
+        <div class="module-card" data-module="curriculum" tabindex="0" role="button" aria-label="Currículo">
+          <div class="module-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3>Currículo</h3>
+          <p>Crie ou melhore seu currículo para área de dados</p>
+        </div>
+
+        <div class="module-card" data-module="interview" tabindex="0" role="button" aria-label="Preparação para Entrevista">
+          <div class="module-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h3>Preparação para Entrevista</h3>
+          <p>Simule entrevistas e prepare respostas estratégicas</p>
+        </div>
+
+        <div class="module-card" data-module="study" tabindex="0" role="button" aria-label="Plano de Estudos">
+          <div class="module-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+          </div>
+          <h3>Plano de Estudos</h3>
+          <p>Monte um cronograma personalizado de aprendizado</p>
+        </div>
+      </div>
+
+      <!-- Modal Assistente de Carreira -->
+      <div class="modal-overlay" id="career-modal">
+        <div class="modal-content">
+          <button class="modal-close" aria-label="Fechar" onclick="closeCareerModal()">&times;</button>
+          <div class="modal-header">
+            <h2>🚀 Monte seu Assistente de Carreira</h2>
+            <p>Siga este guia completo para criar seu consultor de carreira personalizado com IA</p>
+          </div>
+          <div class="career-content">
+            <div class="step-box">
+              <h3>PASSO 1 – Baixe seus relatórios do LinkedIn</h3>
+              <p><strong>👉 Ação:</strong></p>
+              <ol>
+                <li>Acesse o LinkedIn</li>
+                <li>Vá em "Configurações e Privacidade"</li>
+                <li>Clique em "Privacidade de dados"</li>
+                <li>Selecione "Obter cópia de seus dados"</li>
+                <li>Marque apenas os itens abaixo e solicite o download:
+                  <ul>
+                    <li>Perfil</li>
+                    <li>Conexões</li>
+                    <li>Contatos</li>
+                    <li>Histórico do perfil</li>
+                  </ul>
+                </li>
+                <li>Aguarde o e-mail do LinkedIn (pode levar até 24h)</li>
+                <li>Baixe e salve os arquivos</li>
+              </ol>
+              <div class="alert-info">
+                💡 <strong>Dica:</strong> Esses relatórios contêm informações valiosas sobre sua trajetória profissional que serão usadas para personalizar seu assistente.
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="step-box">
+              <h3>PASSO 2 – Crie seu Consultor de Carreira no Gemini</h3>
+              <p><strong>👉 Ação:</strong></p>
+              <ol>
+                <li>Acesse o <a href="https://gemini.google.com" target="_blank">Gemini</a></li>
+                <li>Vá em "Gems" → Criar novo Gem</li>
+                <li>Dê um nome e uma descrição para seu agente</li>
+                <li>Envie ao agente os relatórios que você salvou no Passo 1</li>
+                <li>Cole a instrução abaixo (General Prompt)</li>
+              </ol>
+
+              <h4>Instrução (General Prompt):</h4>
+              <div class="prompt-box">
+<strong>Função e Persona:</strong>
+Atue como um consultor sênior de carreira em tecnologia, especializado em recolocação profissional, empregabilidade e desenvolvimento de talentos, com mais de 15 anos de experiência em Recursos Humanos e Tech Recruiting. Você é um profissional experiente, atualizado com as tendências globais de tecnologia, mercado de trabalho e evolução das competências digitais.
+
+<strong>Conhecimento e Domínio Técnico:</strong>
+Você domina todo o ciclo de planejamento e gestão de carreira em tecnologia — desde a definição de objetivos profissionais até o desenvolvimento técnico e comportamental, com foco em sustentabilidade e bem-estar.
+
+É especialista em:
+• Planejamento de carreira e crescimento profissional
+• Criação de PDIs (Planos de Desenvolvimento Individual) detalhados e mensuráveis
+• Construção de trilhas de estudo personalizadas (tecnológicas e comportamentais)
+• Recolocação e transição de carreira no mercado nacional e global
+• Mapeamento de tendências e projeção de demandas futuras em tecnologia
+
+<strong>Abordagem e Estilo de Trabalho:</strong>
+• Ofereça orientações personalizadas, sempre considerando o perfil, os objetivos e as restrições individuais do cliente (tempo, recursos, idioma, fase de vida)
+• Garanta equilíbrio entre vida profissional, aprendizado e bem-estar pessoal
+• Estruture planos e trilhas em fases claras (curto, médio e longo prazo), com ações práticas, mensuráveis e realistas
+• Use linguagem profissional, empática, motivadora e acessível, adequada a diferentes níveis de senioridade (júnior, pleno, sênior, liderança)
+
+<strong>Entregas Esperadas:</strong>
+Ao ser solicitado, elabore planos e estratégias de desenvolvimento profissional de forma completa, incluindo:
+• <strong>Plano de Carreira:</strong> objetivos, funções-alvo, competências a desenvolver, posicionamento de mercado e estratégias de visibilidade
+• <strong>PDI (Plano de Desenvolvimento Individual):</strong> metas SMART, cronogramas e ações práticas de curto, médio e longo prazo
+• <strong>Trilha de Estudos:</strong> sequência lógica de aprendizado, com recomendações de cursos, certificações, comunidades e práticas complementares
+• <strong>Cronogramas de Progresso:</strong> planos semanais ou mensais que integrem estudo, prática, networking e autocuidado
+• <strong>Insights de Mercado:</strong> tendências relevantes, novas tecnologias e oportunidades de crescimento profissional alinhadas ao objetivo do cliente
+
+<strong>Tom e Estilo de Comunicação:</strong>
+• Clareza, precisão e empatia
+• Estruturação lógica e visualmente organizada (títulos, seções e subtópicos)
+• Enfoque estratégico e inspirador, mas sempre factível e realista
+• Evite jargões desnecessários e priorize explicações práticas
+
+<strong>Propósito Final:</strong>
+Sua missão é guiar profissionais de tecnologia em seu crescimento de forma estruturada, sustentável e personalizada, ajudando-os a alcançar seus objetivos profissionais e a se posicionarem com destaque no mercado.
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="step-box">
+              <h3>PASSO 3 – Faça um Mockup do seu Currículo</h3>
+              <p>Remova dados pessoais e substitua nomes de empresas por informações genéricas.</p>
+              <p><strong>Exemplo:</strong> "Fulana de Tal", "Empresa XYZ"</p>
+              <p>Mantenha suas atividades, cursos, conhecimentos e idiomas.</p>
+              <div class="alert-info">
+                💡 Salve-o dessa forma para usar também quando precisar fazer uma avaliação de ATS via IA (em outro momento).
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="step-box">
+              <h3>PASSO 4 – Peça ao seu Consultor de Carreira</h3>
+              <p>Você vai fazer o prompt a seguir <strong>anexando todos os arquivos</strong> de relatórios que baixou até agora + o mockup do seu currículo.</p>
+              <p>Faça uma lista de objetivos e coloque uma data factível (realista) para a realização de cada um.</p>
+              <p><strong>Exemplo:</strong> pense no que você deseja alcançar nos próximos 5 anos.</p>
+
+              <h4>Prompt para seu Consultor:</h4>
+              <div class="prompt-box">
+Atue conforme sua configuração e os documentos analisados. Você é um consultor sênior de carreira em tecnologia, com mais de 15 anos de experiência em empregabilidade, recolocação profissional e desenvolvimento de talentos em TI.
+
+Você leu e compreendeu os relatórios e o currículo de sua cliente — uma profissional que está [<strong>descrever o momento atual, o cenário de trabalho (se estiver empregada), os principais desafios, dúvidas e oportunidades que identifica no momento presente</strong>].
+
+Sua função é elaborar um plano estratégico completo de desenvolvimento de carreira, incluindo um <strong>Plano de Carreira</strong>, um <strong>PDI (Plano de Desenvolvimento Individual)</strong> e uma <strong>Trilha de Estudos</strong> personalizada, com base nas informações a seguir.
+
+<strong>Perfil:</strong> Analytics Engineer, 2 anos de experiência em SQL, Python, ETL e Power BI
+<strong>Objetivo:</strong> Desenvolvimento na área de Engenharia de Dados e alcançar a primeira vaga internacional em até 18 meses
+<strong>Mercado-alvo:</strong> Remoto global, com foco em empresas SaaS e startups de tecnologia
+<strong>Disponibilidade:</strong> 10 horas semanais para estudo e desenvolvimento
+<strong>Restrições:</strong> orçamento limitado (priorizar recursos gratuitos ou de baixo custo)
+<strong>Nível de detalhamento desejado:</strong> alto
+<strong>Formato de entrega:</strong> texto estruturado, com cronograma trimestral
+<strong>Data de referência:</strong> 26/10/2025
+
+Elabore um plano de ação integrado (Carreira + PDI + Trilha de Estudos) que seja:
+• Estratégico e realista
+• Alinhado às tendências de alta demanda e baixa concorrência no mercado de tecnologia para os próximos 5 anos
+• Voltado a aumentar a empregabilidade, reconhecimento e potencial de ganhos da cliente
+• Focado em posicioná-la como uma profissional valiosa, rara e relevante
+
+Estruture sua resposta com seções claramente identificadas:
+
+<strong>1. Plano de Carreira (3 fases)</strong>
+• Curto prazo (0–3 meses, até 26/01/2026): definir ações imediatas, ajustes de posicionamento, aprendizado base e planejamento
+• Médio prazo (4–12 meses, até 26/10/2026): consolidação técnica, fortalecimento de portfólio, visibilidade e certificações estratégicas
+• Longo prazo (após 26/10/2026): consolidação como Engenheira de Dados
+Inclua metas, marcos de progresso e pontos de decisão.
+
+<strong>2. PDI (Plano de Desenvolvimento Individual)</strong>
+• Estruture metas no formato SMART (específicas, mensuráveis, alcançáveis, relevantes e temporais)
+• Associe ações práticas, ferramentas, cursos, certificações e indicadores de progresso
+• Apresente um cronograma de evolução com revisões trimestrais
+
+<strong>3. Trilha de Estudos (12 meses)</strong>
+• Estruture uma sequência lógica de aprendizado em Análise de Dados, Engenharia de Dados e Inteligência Artificial
+• Priorize recursos gratuitos ou acessíveis (cursos, laboratórios, comunidades, certificações básicas)
+• Conecte os módulos de estudo às competências necessárias para a nova função
+
+<strong>4. Networking e Visibilidade Profissional</strong>
+• Sugira ações de posicionamento estratégico (LinkedIn, comunidades técnicas, eventos, mentores)
+• Indique como aumentar a autoridade técnica e a empregabilidade global
+
+<strong>5. Equilíbrio e Sustentabilidade</strong>
+• Proponha estratégias para manter um ritmo de aprendizado saudável, com equilíbrio entre estudo, trabalho e descanso
+• Sugira micro-hábitos semanais para manter consistência e motivação
+
+<strong>Critérios de Qualidade da Resposta:</strong>
+• Linguagem: profissional, empática e inspiradora, porém prática e clara
+• Estrutura: organizada, com títulos e subtópicos claros
+• Perspectiva: orientada a resultado e diferenciação de mercado
+• Escopo temporal: 2 anos de transição profissional + visão de 5 anos de relevância e crescimento
+• Adote visão de consultor sênior: seja analítico, preditivo e estratégico, equilibrando técnica e carreira
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="step-box">
+              <h3>PASSO 5 – Opcional: Resumo dos Relatórios</h3>
+              <ol>
+                <li>Acesse: <a href="https://notebooklm.google.com" target="_blank">https://notebooklm.google.com</a></li>
+                <li>Suba os arquivos de relatórios que você obteve no Passo 1</li>
+                <li>Peça para ouvir em áudio o resumo e/ou visualizar como mapa mental</li>
+              </ol>
+              <div class="alert-info">
+                💡 Esta ferramenta pode ajudar você a ter insights adicionais sobre sua trajetória profissional.
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="step-box">
+              <h3>PASSO 6 – Análise de Currículo</h3>
+              <p>Use este prompt para pedir ao seu consultor que analise e reescreva seu currículo:</p>
+              
+              <div class="prompt-box">
+Você é uma consultora de carreira e recolocação profissional, especialista em currículos estratégicos, storytelling de marca pessoal e otimização para ATS (Applicant Tracking Systems).
+
+Seu foco é transformar currículos em ferramentas de posicionamento profissional de alto impacto, valorizando conquistas reais, clareza estratégica e linguagem de autoridade — sem exageros ou informações inventadas.
+
+<strong>Objetivo Principal:</strong>
+Reescrever o currículo anexado com foco em:
+• Valor percebido e autoridade profissional
+• Clareza estratégica e narrativa coesa
+• Otimização para sistemas de rastreamento (ATS)
+• Aderência à linguagem de recrutadores e IA corporativa
+
+O texto final deve refletir um profissional confiante, atualizado e bem-posicionado no mercado, comunicando resultados de forma objetiva e autêntica.
+
+<strong>Etapa 1 – Análise Crítica</strong>
+• Avalie a linguagem atual do currículo (clareza, coesão, impacto)
+• Identifique termos genéricos, redundâncias e jargões pouco estratégicos
+• Aponte oportunidades de fortalecimento narrativo, especialmente em resultados e diferenciais
+
+<strong>Etapa 2 – Reescrita Profissional</strong>
+A partir da análise:
+• Reescreva o currículo em formato Markdown, organizado por seções hierarquizadas:
+  - Resumo Profissional
+  - Experiência Profissional
+  - Formação Acadêmica
+  - Competências e Habilidades Técnicas
+  - Idiomas e Certificações (se aplicável)
+• Utilize linguagem moderna, assertiva e orientada a resultados
+• Substitua expressões genéricas por verbos de ação e indicadores de impacto (ex.: liderou, otimizou, aumentou, implementou, reduziu custos, fortaleceu a operação)
+• Reforce diferenciais competitivos com naturalidade, evidenciando realizações, especializações e valores agregados
+
+<strong>Etapa 3 – Apresentação Final</strong>
+Entregue a nova versão:
+• Em Markdown bem estruturado
+• Com bullet points claros e negritos estratégicos para facilitar leitura por humanos e sistemas ATS
+• Tom profissional, confiante e direto, evitando floreios e excesso de adjetivos
+• Com linguagem alinhada a recrutadores e sistemas de IA usados por empresas globais
+
+<strong>Instruções Técnicas:</strong>
+• Não invente dados ou cargos inexistentes
+• Mantenha 100% de aderência às informações originais, apenas reformulando linguagem e estrutura
+• O foco é clareza, autoridade e resultado, não em volume de texto
+• Priorize legibilidade ATS: frases curtas, palavras-chave setoriais, estrutura hierárquica e ausência de formatação visual complexa
+
+<strong>Exemplo de Tom e Estilo Esperado:</strong>
+"Profissional com sólida experiência em gestão de projetos e transformação digital, reconhecido pela capacidade de integrar equipes multidisciplinares e otimizar processos com foco em eficiência operacional e entrega de valor."
+              </div>
+            </div>
+
+            <div class="alert-info" style="margin-top: 30px;">
+              <strong>✅ Parabéns!</strong> Você agora tem todas as ferramentas para criar um assistente de carreira personalizado e potencializar seu desenvolvimento profissional!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário: Análise de Mercado -->
+      <div class="form-section" id="market-form">
+        <div class="form-header">
+          <button class="btn-back" aria-label="Voltar">← Voltar</button>
+          <h2>Análise de Mercado</h2>
+        </div>
+        <form id="form-market">
+          <div class="form-group required">
+            <label for="market-position">Cargo/posição de interesse</label>
+            <input type="text" id="market-position" placeholder="Ex: Analista de Dados, Engenheiro de Dados" required />
+          </div>
+          <div class="form-group required">
+            <label for="market-location">Localização (ou Remoto)</label>
+            <input type="text" id="market-location" placeholder="Ex: São Paulo, Brasil / Remoto" required />
+          </div>
+          <div class="form-group">
+            <label>Tipo de análise</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="market-analysis" value="tendências de contratação" /> Tendências de contratação</label>
+              <label><input type="checkbox" name="market-analysis" value="salários e benefícios" /> Salários e benefícios</label>
+              <label><input type="checkbox" name="market-analysis" value="competências mais demandadas" /> Competências mais demandadas</label>
+              <label><input type="checkbox" name="market-analysis" value="principais empresas contratantes" /> Principais empresas contratantes</label>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Gerar Prompt
+          </button>
+        </form>
+        <div class="result-section" id="market-result" style="display:none;">
+          <div class="result-header">
+            <h3>Prompt Gerado</h3>
+            <div class="result-actions">
+              <button class="btn-action" id="copy-btn-market">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <button class="btn-action" id="reset-btn-market">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Resetar
+              </button>
+            </div>
+          </div>
+          <textarea id="generated-prompt-market" readonly></textarea>
+        </div>
+      </div>
+
+      <!-- Formulário: Currículo -->
+      <div class="form-section" id="curriculum-form">
+        <div class="form-header">
+          <button class="btn-back" aria-label="Voltar">← Voltar</button>
+          <h2>Currículo para Dados</h2>
+        </div>
+        <form id="form-curriculum">
+          <div class="form-group required">
+            <label>O que você quer fazer?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="curriculum-action" value="Criar currículo do zero" required /> Criar currículo do zero</label>
+              <label><input type="radio" name="curriculum-action" value="Reescrever currículo existente" /> Reescrever currículo existente</label>
+            </div>
+          </div>
+          <div class="form-group required">
+            <label for="curriculum-origin">De onde você vem? (área/cargo atual ou anterior)</label>
+            <input type="text" id="curriculum-origin" placeholder="Ex: Administração, Vendas, TI Suporte" required />
+          </div>
+          <div class="form-group required">
+            <label for="curriculum-target">Para onde você quer ir? (cargo de dados desejado)</label>
+            <input type="text" id="curriculum-target" placeholder="Ex: Analista de Dados, Cientista de Dados" required />
+          </div>
+          <div class="form-group required">
+            <label>Experiência em dados</label>
+            <div class="radio-group">
+              <label><input type="radio" name="curriculum-experience" value="não tenho experiência formal em dados" required /> Não tenho experiência formal em dados</label>
+              <label><input type="radio" name="curriculum-experience" value="tenho projetos ou estágios em dados" /> Tenho projetos ou estágios em dados</label>
+              <label><input type="radio" name="curriculum-experience" value="já trabalho com dados (menos de 2 anos)" /> Já trabalho com dados (menos de 2 anos)</label>
+              <label><input type="radio" name="curriculum-experience" value="já trabalho com dados (mais de 2 anos)" /> Já trabalho com dados (mais de 2 anos)</label>
+            </div>
+          </div>
+          <div class="form-group" id="curriculum-text-group" style="display:none;">
+            <label for="curriculum-text">Cole seu currículo atual aqui</label>
+            <textarea id="curriculum-text" placeholder="Cole o texto do seu currículo..."></textarea>
+          </div>
+          <button type="submit" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Gerar Prompt
+          </button>
+        </form>
+        <div class="result-section" id="curriculum-result" style="display:none;">
+          <div class="result-header">
+            <h3>Prompt Gerado</h3>
+            <div class="result-actions">
+              <button class="btn-action" id="copy-btn-curriculum">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <button class="btn-action" id="reset-btn-curriculum">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Resetar
+              </button>
+            </div>
+          </div>
+          <textarea id="generated-prompt-curriculum" readonly></textarea>
+        </div>
+      </div>
+
+      <!-- Formulário: Preparação para Entrevista -->
+      <div class="form-section" id="interview-form">
+        <div class="form-header">
+          <button class="btn-back" aria-label="Voltar">← Voltar</button>
+          <h2>Preparação para Entrevista</h2>
+        </div>
+        <form id="form-interview">
+          <div class="form-group required">
+            <label for="interview-position">Posição para a qual você está se candidatando</label>
+            <input type="text" id="interview-position" placeholder="Ex: Analista de Dados Júnior" required />
+          </div>
+          <div class="form-group required">
+            <label for="interview-company">Tipo de empresa</label>
+            <select id="interview-company" required>
+              <option value="">Selecione...</option>
+              <option value="Startup">Startup</option>
+              <option value="Empresa de médio porte">Empresa de médio porte</option>
+              <option value="Grande corporação">Grande corporação</option>
+              <option value="Consultoria">Consultoria</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tipos de entrevista que você quer praticar</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="interview-types" value="Entrevista técnica" /> Entrevista técnica</label>
+              <label><input type="checkbox" name="interview-types" value="Entrevista comportamental" /> Entrevista comportamental</label>
+              <label><input type="checkbox" name="interview-types" value="Case/desafio prático" /> Case/desafio prático</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="interview-focus">Ponto específico de dificuldade (opcional)</label>
+            <input type="text" id="interview-focus" placeholder="Ex: Falar de experiências sem dados, projetar salário" />
+          </div>
+          <button type="submit" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Gerar Prompt
+          </button>
+        </form>
+        <div class="result-section" id="interview-result" style="display:none;">
+          <div class="result-header">
+            <h3>Prompt Gerado</h3>
+            <div class="result-actions">
+              <button class="btn-action" id="copy-btn-interview">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <button class="btn-action" id="reset-btn-interview">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Resetar
+              </button>
+            </div>
+          </div>
+          <textarea id="generated-prompt-interview" readonly></textarea>
+        </div>
+      </div>
+
+      <!-- Formulário: Plano de Estudos -->
+      <div class="form-section" id="study-form">
+        <div class="form-header">
+          <button class="btn-back" aria-label="Voltar">← Voltar</button>
+          <h2>Plano de Estudos</h2>
+        </div>
+        <form id="form-study">
+          <div class="form-group required">
+            <label>Em que momento você está?</label>
+            <div class="radio-group">
+              <label><input type="radio" name="study-moment" value="Começando do zero em dados" required /> Começando do zero em dados</label>
+              <label><input type="radio" name="study-moment" value="Já tenho conhecimento básico" /> Já tenho conhecimento básico</label>
+              <label><input type="radio" name="study-moment" value="Já trabalho com dados mas quero me especializar" /> Já trabalho com dados mas quero me especializar</label>
+            </div>
+          </div>
+          <div class="form-group required">
+            <label for="study-goal">Qual seu objetivo?</label>
+            <input type="text" id="study-goal" placeholder="Ex: Conseguir meu primeiro emprego em dados" required />
+          </div>
+          <div class="form-group required">
+            <label for="study-time">Em quanto tempo você quer alcançar esse objetivo?</label>
+            <select id="study-time" required>
+              <option value="">Selecione...</option>
+              <option value="1 mês">1 mês</option>
+              <option value="3 meses">3 meses</option>
+              <option value="6 meses">6 meses</option>
+              <option value="1 ano">1 ano</option>
+            </select>
+          </div>
+          <div class="form-group required">
+            <label for="study-hours">Quantas horas por semana você pode estudar?</label>
+            <select id="study-hours" required>
+              <option value="">Selecione...</option>
+              <option value="5-10 horas">5-10 horas</option>
+              <option value="10-15 horas">10-15 horas</option>
+              <option value="15-20 horas">15-20 horas</option>
+              <option value="Mais de 20 horas">Mais de 20 horas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>O que você já sabe? (marque todas as que se aplicam)</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="study-skills" value="Excel básico" /> Excel básico</label>
+              <label><input type="checkbox" name="study-skills" value="SQL" /> SQL</label>
+              <label><input type="checkbox" name="study-skills" value="Python" /> Python</label>
+              <label><input type="checkbox" name="study-skills" value="Power BI / Tableau" /> Power BI / Tableau</label>
+              <label><input type="checkbox" name="study-skills" value="Estatística" /> Estatística</label>
+              <label><input type="checkbox" name="study-skills" value="Machine Learning" /> Machine Learning</label>
+            </div>
+          </div>
+          <div class="alert-warn" id="study-skills-warning" style="display:none;">
+            ⚠️ Se você marcou "Começando do zero" mas selecionou habilidades, revise sua resposta.
+          </div>
+          <button type="submit" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Gerar Prompt
+          </button>
+        </form>
+        <div class="result-section" id="study-result" style="display:none;">
+          <div class="result-header">
+            <h3>Prompt Gerado</h3>
+            <div class="result-actions">
+              <button class="btn-action" id="copy-btn-study">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <button class="btn-action" id="reset-btn-study">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Resetar
+              </button>
+            </div>
+          </div>
+          <textarea id="generated-prompt-study" readonly></textarea>
+        </div>
+      </div>
+
+      <!-- Feedback de cópia -->
+      <div class="copy-feedback" id="copy-feedback">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Prompt copiado!
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-logo">Antrop-IA</div>
+    <p>Desenvolvido pela empresa <strong>Antrop-IA</strong></p>
+    <p style="margin-top: 8px; font-size: 13px;">© 2025 - Todos os direitos reservados</p>
+  </footer>
+
+  <script>
+    // Ícones inline simples (mantidos do original)
+    function hydrateIcons() {
+      // Função mantida para compatibilidade
+    }
+
+    let currentModule = null;
+
+    // Abre o modal do assistente de carreira
+    function showCareerModal() {
+      document.getElementById('career-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Fecha o modal do assistente de carreira
+    function closeCareerModal() {
+      document.getElementById('career-modal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Fecha modal ao clicar fora
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('career-modal');
+      if (e.target === modal) {
+        closeCareerModal();
+      }
+    });
+
+    // ESC para fechar modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCareerModal();
+      }
+    });
+
+    function showModule(module) {
+      if (module === 'career') {
+        showCareerModal();
+        return;
+      }
+      currentModule = module;
+      document.querySelectorAll('.modules-section')[0].style.display = 'none';
+      document.getElementById(`${module}-form`).classList.add('active');
+    }
+
+    function resetForm() {
+      if (currentModule) {
+        document.getElementById(`${currentModule}-form`).classList.remove('active');
+        document.getElementById(`${currentModule}-result`).style.display = 'none';
+        const form = document.getElementById(`form-${currentModule}`);
+        if (form) form.reset();
+        if (currentModule === 'curriculum') {
+          document.getElementById('curriculum-text-group').style.display = 'none';
+        }
+        if (currentModule === 'study') {
+          document.getElementById('study-skills-warning').style.display = 'none';
+        }
+      }
+      document.querySelectorAll('.modules-section')[0].style.display = 'grid';
+      currentModule = null;
+    }
+
+    function toggleCurriculumTextField() {
+      const action = document.querySelector('input[name="curriculum-action"]:checked').value;
+      const textGroup = document.getElementById('curriculum-text-group');
+      textGroup.style.display = (action === 'Reescrever currículo existente') ? 'block' : 'none';
+    }
+
+    function validateStudySkills() {
+      const moment = document.querySelector('input[name="study-moment"]:checked');
+      const skills = document.querySelectorAll('input[name="study-skills"]:checked');
+      const warning = document.getElementById('study-skills-warning');
+      if (moment && moment.value === 'Começando do zero em dados' && skills.length > 0) {
+        warning.style.display = 'block';
+      } else {
+        warning.style.display = 'none';
+      }
+    }
+
+    // Submits
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('form-market').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const prompt = buildMarketPrompt();
+        document.getElementById('generated-prompt-market').value = prompt;
+        document.getElementById('market-result').style.display = 'block';
+      });
+      document.getElementById('form-curriculum').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const prompt = buildCurriculumPrompt();
+        document.getElementById('generated-prompt-curriculum').value = prompt;
+        document.getElementById('curriculum-result').style.display = 'block';
+      });
+      document.getElementById('form-interview').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const prompt = buildInterviewPrompt();
+        document.getElementById('generated-prompt-interview').value = prompt;
+        document.getElementById('interview-result').style.display = 'block';
+      });
+      document.getElementById('form-study').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const prompt = buildStudyPrompt();
+        document.getElementById('generated-prompt-study').value = prompt;
+        document.getElementById('study-result').style.display = 'block';
+      });
+    });
+
+    // Geradores de prompt
+    function buildMarketPrompt() {
+      const position = document.getElementById('market-position').value;
+      const location = document.getElementById('market-location').value;
+      const analysis = Array.from(document.querySelectorAll('input[name="market-analysis"]:checked')).map(cb => cb.value).join(', ');
+      return `Você é um especialista em mercado de trabalho brasileiro na área de dados. Preciso de uma análise detalhada sobre o mercado para a posição de ${position} em ${location}.
+
+Foque nos seguintes aspectos: ${analysis || 'visão geral do mercado'}.
+
+Para cada aspecto, traga:
+1. **Estado atual do mercado**: Como está a demanda agora (crescendo, estável, em queda)?
+2. **Números concretos** (quando possível): Faixas salariais reais praticadas no Brasil, quantidade aproximada de vagas, principais empresas contratantes.
+3. **Competências mais valorizadas**: O que recrutadores estão buscando de verdade (separe: obrigatórias vs. diferenciais).
+4. **Perfil do profissional contratado**: Senioridade, formação típica, certificações relevantes.
+5. **Tendências para os próximos 6-12 meses**: O que está mudando (novas ferramentas, especializações em alta, mudanças no formato de trabalho).
+6. **Dicas práticas**: Como se destacar nesse mercado específico no Brasil.
+
+Importante:
+- Use dados do mercado BRASILEIRO (não traga informações de fora que não se aplicam aqui).
+- Seja realista e direto.
+- Se não tiver dados específicos de algum ponto, diga isso claramente e traga o contexto geral da área de dados no Brasil.`;
+    }
+
+    function buildCurriculumPrompt() {
+      const action = document.querySelector('input[name="curriculum-action"]:checked').value;
+      const origin = document.getElementById('curriculum-origin').value;
+      const target = document.getElementById('curriculum-target').value;
+      const experience = document.querySelector('input[name="curriculum-experience"]:checked').value;
+      const currentCV = document.getElementById('curriculum-text').value;
+      if (action === 'Criar currículo do zero') {
+        return `Você é um especialista em recrutamento para área de dados no Brasil. Preciso que você crie um currículo profissional para a posição de ${target}, considerando que eu venho de ${origin} e ${experience}.
+
+Contexto importante:
+- Mercado brasileiro de dados
+- Formato ATS-friendly (passa em sistemas automáticos de triagem)
+- Destaque para experiências transferíveis (mesmo que não sejam de dados)
+- Traduza minhas experiências anteriores para linguagem de dados (análise, organização, decisões baseadas em dados)
+
+Estrutura do currículo:
+1. **Headline** (1 frase que deixe claro que trabalho/quero trabalhar com dados)
+2. **Resumo profissional** (3-4 linhas mostrando de onde venho e pra onde vou)
+3. **Experiências** (se tiver) ou **Projetos** (se não tiver experiência oficial)
+   - Use verbos de ação (criei, analisei, desenvolvi, automatizei, organizei)
+   - Quantifique resultados sempre que possível
+   - Mostre impacto nos projetos/trabalhos
+4. **Habilidades técnicas** (SQL, Python, Power BI, Excel - apenas as que eu realmente sei ou estou aprendendo)
+5. **Formação**
+
+Use linguagem objetiva, evite clichês ("proativo", "dedicado", "inovador") e mantenha tudo em português brasileiro. 
+
+IMPORTANTE: Não invente experiências que eu não tenho - traduza o que eu já fiz para o contexto de dados. Se eu trabalhei com vendas, mostre como eu analisava indicadores de performance. Se trabalhei com administração, mostre como eu organizava informações e tomava decisões baseadas em dados.`;
+      } else {
+        return `Você é um especialista em recrutamento para área de dados no Brasil. Vou colar meu currículo atual abaixo e preciso que você o reescreva completamente para a posição de ${target} no mercado brasileiro de dados.
+
+MEU CURRÍCULO ATUAL:
+${currentCV}
+
+Reescreva considerando:
+- Mantenha minhas experiências reais, mas traduza para linguagem de dados
+- Destaque: análise, organização de informações, decisões baseadas em dados, criação de relatórios/dashboards, automação de processos
+- Formato ATS-friendly (sistema de triagem automático)
+- Adicione seção de habilidades técnicas relevantes para dados (se eu não tiver mencionado, sugira com base nas minhas experiências)
+- Reescreva descrições de forma objetiva e com verbos de ação
+- Use números e impacto sempre que possível ("reduzi em X%", "aumentei em Y", "processei Z registros")
+- Tudo em português brasileiro
+
+IMPORTANTE: Não invente experiências que eu não tenho. Traduza o que já fiz para o contexto de dados, mostrando como eu já trabalhava com análise, indicadores, relatórios, organização de informações, mesmo que não tivesse o cargo oficial de "dados".
+
+Se houver lacunas de experiência técnica, sugira projetos práticos que eu possa fazer para complementar o currículo (usando dados públicos brasileiros: IBGE, dados.gov.br, Kaggle).`;
+      }
+    }
+
+    function buildInterviewPrompt() {
+      const position = document.getElementById('interview-position').value;
+      const company = document.getElementById('interview-company').value;
+      const types = Array.from(document.querySelectorAll('input[name="interview-types"]:checked')).map(cb => cb.value).join(', ');
+      const focus = document.getElementById('interview-focus').value;
+      let prompt = `Você é um recrutador especializado em contratação para área de dados no Brasil, com experiência em ${company}. Preciso que você simule uma entrevista para a posição de ${position} e me prepare adequadamente.
+
+Contexto:
+- Mercado brasileiro de dados
+- Processos seletivos comuns no Brasil
+- Foco em ${types}
+
+O que eu preciso:
+
+1. **Perguntas de entrevista:**
+   - 5 perguntas técnicas (sobre ferramentas, processos, conceitos de dados)
+   - 5 perguntas comportamentais (sobre experiências, desafios, trabalho em equipe)
+
+2. **Para cada pergunta, explique:**
+   - O que o recrutador quer avaliar com essa pergunta
+   - Qual tipo de resposta é esperada
+   - O que NÃO fazer/dizer
+
+3. **Traga exemplo de resposta estruturada:**
+   - Para perguntas comportamentais, use método STAR (Situação, Tarefa, Ação, Resultado)
+   - Para perguntas técnicas, traga exemplo de resposta clara e objetiva`;
+      if (focus) prompt += `
+
+4. **Dê atenção especial a:** ${focus}`;
+      prompt += `
+
+Adapte as perguntas para o nível da vaga e para a realidade brasileira. Não use perguntas gringas ou muito genéricas que não refletem como entrevistas funcionam no Brasil.
+
+Importante: Considere que processos seletivos no Brasil costumam ter múltiplas etapas (triagem de currículo, teste técnico, entrevista com RH, entrevista técnica, case/desafio) e adapte as perguntas para o contexto.`;
+      return prompt;
+    }
+
+    function buildStudyPrompt() {
+      const moment = document.querySelector('input[name="study-moment"]:checked').value;
+      const goal = document.getElementById('study-goal').value;
+      const time = document.getElementById('study-time').value;
+      const hours = document.getElementById('study-hours').value;
+      const skills = Array.from(document.querySelectorAll('input[name="study-skills"]:checked')).map(cb => cb.value).join(', ');
+      return `Você é um mentor de carreira especializado em dados no Brasil. Preciso que você monte um plano de estudo personalizado para eu alcançar o seguinte objetivo: ${goal}.
+
+Meu contexto:
+- Nível atual: ${moment}
+- Já sei: ${skills}
+- Tenho ${time} para estudar
+- Posso dedicar ${hours} por semana
+
+Monte um plano considerando:
+- **Mercado brasileiro de dados** (priorize o que as empresas daqui pedem: Power BI é mais usado que Tableau, SQL é obrigatório em 90% das vagas, Python é valorizado mas menos comum em júnior, Excel avançado ainda é muito importante)
+- Ordem lógica de aprendizado (do mais básico ao mais avançado)
+- Ferramentas gratuitas ou acessíveis no Brasil
+- Projetos práticos com dados brasileiros (IBGE, dados.gov.br, Kaggle com bases BR)
+
+Estrutura do plano:
+
+1. **Visão geral**: O que vou aprender e em que ordem (lista resumida de tópicos)
+
+2. **Cronograma semanal detalhado**: 
+   - Semana 1: [tema] - [o que estudar] - [horas estimadas] - [recursos sugeridos]
+   - Semana 2: [tema] - [o que estudar] - [horas estimadas] - [recursos sugeridos]
+   - (continue até completar o prazo total)
+
+3. **Recursos sugeridos** para cada etapa:
+   - Cursos gratuitos (YouTube, Coursera gratuito, Data Science Academy)
+   - Materiais escritos (documentações, tutoriais em português)
+   - Comunidades brasileiras (onde tirar dúvidas)
+
+4. **Projetos práticos** para portfólio (pelo menos 2-3 projetos ao longo do plano):
+   - Projeto 1: [tema] usando [dataset brasileiro] - [semana X]
+   - Projeto 2: [tema] usando [dataset brasileiro] - [semana Y]
+   - Mostre como documentar e apresentar no LinkedIn/GitHub
+
+5. **Checkpoints de validação**: Como saber se aprendi
+   - Semana X: "Consigo fazer uma análise exploratória sozinho"
+   - Semana Y: "Consigo criar um dashboard simples no Power BI"
+
+Seja REALISTA com o tempo disponível. Melhor um plano executável do que um impossível. Se eu tiver pouco tempo (1 mês, 5-10h/semana), priorize apenas o ESSENCIAL pro mercado brasileiro. Se eu tiver mais tempo, pode aprofundar.
+
+Importante: Adapte o plano para o nível inicial que eu mencionei. Se estou começando do zero, não pule fundamentos. Se já trabalho com dados, foque em aprofundamento ou nova especialização.`;
+    }
+
+    // Clipboard moderno
+    async function copyToClipboard(textareaId) {
+      const ta = document.getElementById(textareaId);
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        document.getElementById('copy-feedback').classList.add('active');
+        setTimeout(() => document.getElementById('copy-feedback').classList.remove('active'), 2000);
+      } catch (e) {
+        ta.select(); document.execCommand('copy');
+        document.getElementById('copy-feedback').classList.add('active');
+        setTimeout(() => document.getElementById('copy-feedback').classList.remove('active'), 2000);
+      }
+    }
+
+    // Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      hydrateIcons();
+
+      document.querySelectorAll('.module-card').forEach(card => {
+        card.addEventListener('click', () => showModule(card.dataset.module));
+        card.addEventListener('keypress', (e) => { if (e.key === 'Enter') showModule(card.dataset.module); });
+      });
+      document.querySelectorAll('.btn-back').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); resetForm(); }));
+      document.querySelectorAll('input[name="curriculum-action"]').forEach(r => r.addEventListener('change', toggleCurriculumTextField));
+      document.querySelectorAll('input[name="study-skills"]').forEach(cb => cb.addEventListener('change', validateStudySkills));
+
+      // Event listeners para botões de cada módulo
+      document.getElementById('copy-btn-market')?.addEventListener('click', () => copyToClipboard('generated-prompt-market'));
+      document.getElementById('copy-btn-curriculum')?.addEventListener('click', () => copyToClipboard('generated-prompt-curriculum'));
+      document.getElementById('copy-btn-interview')?.addEventListener('click', () => copyToClipboard('generated-prompt-interview'));
+      document.getElementById('copy-btn-study')?.addEventListener('click', () => copyToClipboard('generated-prompt-study'));
+      
+      document.querySelectorAll('[id^="reset-btn"]').forEach(btn => btn.addEventListener('click', resetForm));
+    });
+  </script>
+</body>
+</html>
